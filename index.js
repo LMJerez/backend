@@ -6,6 +6,7 @@ import { PrismaClient } from "@prisma/client";
 
 import plazaRoutes from "./routes/plaza.routes.js";
 import resumenRoutes from "./routes/resumen.routes.js";
+import parqueoRoutes from "./routes/parqueo.routes.js";
 
 dotenv.config();
 
@@ -23,10 +24,11 @@ app.get("/", (req, res) => {
 // Rutas API
 app.use("/api/plazas", plazaRoutes);
 app.use("/api/resumen", resumenRoutes);
+app.use("/api/parqueo", parqueoRoutes);
 
 // Middleware para errores
 app.use((err, req, res, next) => {
-  console.error("💥 Error no manejado:", err);
+  console.error("⚠️ Error no manejado:", err);
   res.status(500).json({ error: "Error interno del servidor" });
 });
 
