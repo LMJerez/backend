@@ -8,15 +8,27 @@ import plazaRoutes from "./routes/plaza.routes.js";
 import resumenRoutes from "./routes/resumen.routes.js";
 
 dotenv.config();
+
 const app = express();
 const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
 
-// Rutas
+// Ruta raíz de prueba
+app.get("/", (req, res) => {
+  res.send("🚗 API Parqueadero activa y funcionando");
+});
+
+// Rutas API
 app.use("/api/plazas", plazaRoutes);
 app.use("/api/resumen", resumenRoutes);
+
+// Middleware para errores
+app.use((err, req, res, next) => {
+  console.error("💥 Error no manejado:", err);
+  res.status(500).json({ error: "Error interno del servidor" });
+});
 
 // Inicio del servidor
 const PORT = process.env.PORT || 4000;
