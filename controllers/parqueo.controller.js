@@ -10,7 +10,6 @@ export const registrarIngreso = async (req, res) => {
   }
 
   try {
-    // Verificar si la plaza está ocupada
     const plaza = await prisma.plaza.findUnique({ where: { id: plazaId } });
 
     if (!plaza || plaza.ocupada) {
@@ -19,12 +18,10 @@ export const registrarIngreso = async (req, res) => {
         .json({ error: "La plaza no existe o ya está ocupada" });
     }
 
-    // Obtener valor por minuto desde el tipo de vehículo
     const tipo = await prisma.tipoVehiculo.findUnique({
       where: { id: plaza.tipoVehiculoId },
     });
 
-    // Crear registro de parqueo
     const nuevoParqueo = await prisma.parqueo.create({
       data: {
         plazaId,
@@ -33,7 +30,6 @@ export const registrarIngreso = async (req, res) => {
       },
     });
 
-    // Marcar la plaza como ocupada
     await prisma.plaza.update({
       where: { id: plazaId },
       data: { ocupada: true },
@@ -55,7 +51,6 @@ export const registrarSalida = async (req, res) => {
   }
 
   try {
-    // Obtener el parqueo activo
     const parqueo = await prisma.parqueo.findUnique({
       where: { id: parqueoId },
     });
@@ -69,12 +64,11 @@ export const registrarSalida = async (req, res) => {
     const horaFin = new Date();
     const minutosTranscurridos = Math.ceil(
       (horaFin - parqueo.horaInicio) / 60000
-    ); // ms → minutos
+    );
 
     const valorParqueo = parqueo.valorMinuto * minutosTranscurridos;
     const totalPagar = valorParqueo - descuento;
 
-    // Actualizar registro de parqueo
     const parqueoActualizado = await prisma.parqueo.update({
       where: { id: parqueoId },
       data: {
@@ -86,7 +80,6 @@ export const registrarSalida = async (req, res) => {
       },
     });
 
-    // Liberar la plaza
     await prisma.plaza.update({
       where: { id: parqueo.plazaId },
       data: { ocupada: false },
@@ -96,5 +89,40 @@ export const registrarSalida = async (req, res) => {
   } catch (error) {
     console.error("Error al registrar salida:", error);
     res.status(500).json({ error: "Error interno al registrar salida" });
+  }
+};
+
+// >>> Inicializar datos: tipos de vehículo y plazas
+export const inicializarDatos = async (req, res) => {
+  try {
+    const tiposExistentes = await prisma.tipoVehiculo.findMany();
+
+    if (tiposExistentes.length > 0) {
+      return res
+        .status(200)
+        .json({ mensaje: "Los datos ya fueron inicializados." });
+    }
+
+    const tipoCarro = await prisma.tipoVehiculo.create({
+      data: { nombre: "CARRO", valorMinuto: 100 },
+    });
+
+    const tipoMoto = await prisma.tipoVehiculo.create({
+      data: { nombre: "MOTO", valorMinuto: 50 },
+    });
+
+    await prisma.plaza.createMany({
+      data: [
+        { nombre: "A1", tipoVehiculoId: tipoCarro.id },
+        { nombre: "A2", tipoVehiculoId: tipoCarro.id },
+        { nombre: "M1", tipoVehiculoId: tipoMoto.id },
+        { nombre: "M2", tipoVehiculoId: tipoMoto.id },
+      ],
+    });
+
+    res.status(201).json({ mensaje: "Tipos y plazas creados exitosamente." });
+  } catch (error) {
+    console.error("Error al inicializar datos:", error);
+    res.status(500).json({ error: "Error interno al inicializar datos." });
   }
 };
