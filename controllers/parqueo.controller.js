@@ -104,11 +104,11 @@ export const inicializarDatos = async (req, res) => {
     }
 
     const tipoCarro = await prisma.tipoVehiculo.create({
-      data: { nombre: "CARRO", valorMinuto: 100 },
+      data: { tipo: "CARRO", valorMinuto: 100 },
     });
 
     const tipoMoto = await prisma.tipoVehiculo.create({
-      data: { nombre: "MOTO", valorMinuto: 50 },
+      data: { tipo: "MOTO", valorMinuto: 50 },
     });
 
     await prisma.plaza.createMany({
