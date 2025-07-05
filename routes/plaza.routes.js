@@ -1,6 +1,7 @@
 import express from "express";
-import { getPlazasDisponibles } from "../controllers/plaza.controller.js";
+import { getPlazasConEstado } from "../controllers/plaza.controller.js";
 
 const router = express.Router();
-router.get("/disponibles", getPlazasDisponibles);
+router.get("/completo", getPlazasConEstado); // ✅ Única ruta activa
+
 export default router;
